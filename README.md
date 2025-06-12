@@ -38,5 +38,16 @@ but we need to to be sure!
 
 also i noticed that the ip.forward =0/1 is buggy and we need to play with wlan0 enable/disable
 
+The idea is as follows:
+Each raspberry pi is active
+the input will be as follows -> PiSource,PiDest,OLSR=off/on,Path
+
+api needs to send information o my raspberry pis
+
+This info includes 
+Preprocessing
+
+I send RaspberryPi source that i need you to run iperfclient and 
+
 
 
