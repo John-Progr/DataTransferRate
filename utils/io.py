@@ -1,28 +1,28 @@
 import json
 import os
+from datetime import datetime
 from models import DataTransferRateResponse
 
 
 def save_data_transfer_rate_to_file(
     response: DataTransferRateResponse,
-    file_path: str = "data_transfer_log.json"
+    file_path: str = "data_transfer_log.csv"
 ):
     if not response.timestamp:
-        from datetime import datetime
         response.timestamp = datetime.utcnow().isoformat()
-
+    
     record = response.dict()
-
-    if os.path.exists(file_path):
-        with open(file_path, "r", encoding="utf-8") as f:
-            try:
-                data = json.load(f)
-            except json.JSONDecodeError:
-                data = []
-    else:
-        data = []
-
-    data.append(record)
-
-    with open(file_path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2)
+    
+    # Check if file exists to determine if we need to write headers
+    file_exists = os.path.exists(file_path)
+    
+    # Open file in append mode
+    with open(file_path, "a", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=record.keys())
+        
+        # Write header only if file is new/empty
+        if not file_exists or os.path.getsize(file_path) == 0:
+            writer.writeheader()
+        
+        # Write the record
+        writer.writerow(record)
