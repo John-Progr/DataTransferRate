@@ -1,6 +1,5 @@
 
 
-
 # Helper functions
 def get_channel_frequency(channel: int) -> int:
     """Get frequency for a channel"""

@@ -21,12 +21,13 @@ def get_data_transfer_rate_endpoint(
      """
 
      try:
-        return get_data_transfer_rate(
+        data = get_data_transfer_rate(
             source=source,
             destination=destination,
             path=path,
             wireless_channel=wireless_channel
         )
+        log_data = save_data_transfer_rate_to_file(DataTransferRateResponse,"./data_transfer_log.csv")
     except ValueError as e:
         raise_bad_request(str(e))
     except Exception as e:
