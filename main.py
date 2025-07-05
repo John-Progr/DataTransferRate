@@ -3,7 +3,7 @@ from router import router
 
 app = FastAPI(
     title="Data Transfer Rate API",
-    description="An API to get the data transfer rate between two nodes",
+    description="An API to get the data transfer rate between two nodes in a multihop scenario",
     version="1.0.0"
 )
 

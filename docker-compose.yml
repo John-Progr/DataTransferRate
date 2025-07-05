@@ -1,44 +1,14 @@
 version: "3.9"
-services:
-  ditto:
-    build:
-      context: ./ditto
-      dockerfile: Dockerfile
-    ports:
-      - "8001:8000"
-    volumes:
-      - ./ditto:/app/ditto
-    env_file:
-      - .env
-    environment:
-      - DITTO_API_BASE_URL
-      - DITTO_USERNAME
-      - DITTO_PASSWORD
 
+services:
   fastapi:
     build:
-      context: ./  
-      dockerfile: Dockerfile  
+      context: ./
+      dockerfile: Dockerfile
     ports:
-      - "8000:8000" 
+      - "8000:8000"
     volumes:
-      - ./:/app  
+      - ./:/app
     env_file:
-      - .env  
-    depends_on:
-      - ditto
-      - ml_algorithm
-      - influxdb
+      - .env
     command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
-
-secrets:
-  influxdb2-admin-username:
-    file: ./influxdb/secrets/influxdb2-admin-username
-  influxdb2-admin-password:
-    file: ./influxdb/secrets/influxdb2-admin-password
-  influxdb2-admin-token:
-    file: ./influxdb/secrets/influxdb2-admin-token
-
-volumes:
-  influxdb2-data:
-  influxdb2-config:
