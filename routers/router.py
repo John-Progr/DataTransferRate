@@ -6,32 +6,26 @@ from servcies import get_data_transfer_rate
 
 router = APIRouter(prefix="/network", tags=["network"])
 
-@router.get("/data-transfer-rate", response_model=DataTransferRateResponse)
-def get_data_transfer_rate_endpoint(
-    source: str,
-    destination: str,
-    path: List[str],
-    wireless_channel: Optional[int] = None
-):
+
+@router.post("/data-transfer-rate", response_model=DataTransferRateResponse)
+def get_data_transfer_rate_endpoint(request: DataTransferRateRequest):
     """
-     Get data transfer rate measurements between source and destination through specified path.
+    Get data transfer rate measurements between source and destination through specified path.
+    All nodes in the path use the same wireless channel if specified.
+    """
 
-     All nodes in the path use the same wireless channel if specified.
-
-     """
-
-     try:
+    try:
         data = get_data_transfer_rate(
-            source=source,
-            destination=destination,
-            path=path,
-            wireless_channel=wireless_channel
+            source=request.source,
+            destination=request.destination,
+            path=request.path,
+            wireless_channel=request.wireless_channel
         )
-        log_data = save_data_transfer_rate_to_file(DataTransferRateResponse,"./data_transfer_log.csv")
+        # Save to file, if needed
+        save_data_transfer_rate_to_file(data, "./data_transfer_log.csv")
+        return data
+
     except ValueError as e:
-        raise_bad_request(str(e))
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise_internan_server_error()
-
-
-
+        raise HTTPException(status_code=500, detail="Internal Server Error")

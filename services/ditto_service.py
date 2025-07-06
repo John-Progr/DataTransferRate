@@ -58,7 +58,7 @@ async def send_message_to_ditto(
     """
     Send a message to the digital twin's inbox to reconfigure OLSRd.
     """
-    url = f"{DITTO_API_BASE_URL}/api/2/things/{twin_id}/inbox/messages/olsr_reconfigure?timeout=0s"
+    url = f"{DITTO_API_BASE_URL}/api/2/things/{twin_id}/inbox/messages/start_throughput_measurement?timeout=0s"
 
     logger.info(f"Sending message to Ditto twin with ID {twin_id} at: {url}")
     
