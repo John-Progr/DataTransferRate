@@ -26,24 +26,26 @@ def get_data_transfer_rate(source: str, destination: str, path: List[str], wirel
    
   #here we will run a loop for each intermdiate node from path list 
 
-  for intermediate_node in filter(None, path):
-    intermediate_id = get_thing_id_by_ip(intermediate_node)
+    next_hops = list(path[1:]) + [destination]  # The next hop for each node, last one routes to destination
+
+    for intermediate_node, next_ip in zip(filter(None, path), next_hops):
+        intermediate_id = get_thing_id_by_ip(intermediate_node)
+        payload_intermediate = {
+            "role": "intermediate",
+            "wireless_channel": wireless_channel,
+            "region": region,
+            "ip_routing": next_ip
+        }
+        await send_message_to_ditto(payload_intermediate, intermediate_id)
     
-    payload_intermediate = {
-        "role": "intermediate",
-        "wireless_channel": wireless_channel,
-        "region": region
 
-    }
-
-    await send_message_to_ditto(payload_intermediate, intermediate_id)
-
-   #we start by sending the iperf client the role:client,the channel: wireless_channel 
    payload_source = {
     "role": "client",
     "wireless_channel": wireless_channel,
-    "region": region
-   }
+    "region": region,
+    "ip_server": destination,
+    "ip_routing": path[0] if path else None  # first IP in the path or None if path is empty
+  }
 
    source_id = get_thing_id_by_ip(source)
 
