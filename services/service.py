@@ -1,8 +1,6 @@
 from datetime import datetime
 from models import DataTransferRateResponse
 
-
-
 def get_data_transfer_rate(source: str, destination: str, path: List[str], wireless_channel: Optional[int]) -> DataTransferRateResponse:
    
    #take the inputs and started distributing the messages to the appropriate nodes
