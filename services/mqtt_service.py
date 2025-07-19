@@ -1,8 +1,9 @@
 # mqtt_service.py
 import logging
 from typing import Dict, Any, Union
-from mqtt_client import MQTTClient
-from mqtt_model import ClientCommand, ForwarderCommand, ServerCommand
+from mqtt_core.mqtt_client import MQTTClient
+from models.mqtt_model import ClientCommand, ForwarderCommand, ServerCommand
+
 
 logger = logging.getLogger(__name__)
 

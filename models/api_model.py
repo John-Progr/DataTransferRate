@@ -1,5 +1,5 @@
-from pydantic import BaseModel
-from typing import Optional
+from pydantic import BaseModel, Field
+from typing import List, Optional 
 
 
 class DataTransferRateRequest(BaseModel):
@@ -13,5 +13,11 @@ class DataTransferRateResponse(BaseModel):
     source: str
     destination: str
     rate_mbps: float
-    wireless_channel: str
-    timestamp: Optional[str] = None
+    wireless_channel: int
+    timestamp: Optional[int] = None
+
+
+class HealthCheckResponse(BaseModel):
+    status: str
+    message: str
+    timestamp: int

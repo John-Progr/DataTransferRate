@@ -2,7 +2,7 @@
 import logging
 from typing import Dict
 from fastapi import Depends, HTTPException
-from mqtt_client import MQTTClient
+from mqtt_core.mqtt_client import MQTTClient
 
 logger = logging.getLogger(__name__)
 

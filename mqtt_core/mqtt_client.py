@@ -6,7 +6,7 @@ import time
 from typing import Optional, Dict, Any, Callable
 from datetime import datetime
 import paho.mqtt.client as mqtt
-from mqtt_config import (
+from configurations.mqtt_config import (
     MQTT_BROKER_HOST, 
     MQTT_BROKER_PORT, 
     MQTT_USERNAME, 

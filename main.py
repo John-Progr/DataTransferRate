@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from router import router
+from routers.router import router
 
 app = FastAPI(
     title="Data Transfer Rate API",

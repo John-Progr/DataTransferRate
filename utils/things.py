@@ -1,5 +1,5 @@
 # utils.py
-from constants import ThingsConstants
+from constants.things import ThingsConstants
 
 def get_thing_id_by_ip(ip: str) -> str:
     """Get thing ID for a given IP address."""

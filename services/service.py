@@ -1,5 +1,8 @@
 from datetime import datetime
-from models import DataTransferRateResponse
+from models.api_model import DataTransferRateResponse, DataTransferRateRequest
+from typing import List, Optional 
+from services.mqtt_service import MQTTService
+
 
 def get_data_transfer_rate(source: str, destination: str, path: List[str], wireless_channel: Optional[int], mqtt_service: MQTTService) -> DataTransferRateResponse:
 
@@ -45,14 +48,12 @@ def get_data_transfer_rate(source: str, destination: str, path: List[str], wirel
     mqtt_service.send_command(client_cmd)
 
     #here we are subscribed to the response topic to receive the response from the source node
-   await send_message_to_ditto(payload_source, source_id)
-
-   async for state in get_digital_twin_state():
-    
-    if thing_id = state,get(source_id):
-        #something similar
-        neighbors = state.get("features", {}).get("network", {}).get("properties", {}).get("neighbors", [])
-        break
+    """ 
+    async for state in get_digital_twin_state():
+        if thing_id = state,get(source_id):
+            #something similar
+            neighbors = state.get("features", {}).get("network", {}).get("properties", {}).get("neighbors", [])
+            break"""
     
 
     return DataTransferRateResponse(
