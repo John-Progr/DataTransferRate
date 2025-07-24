@@ -23,31 +23,17 @@ def get_mqtt_client() -> MQTTClient:
     return mqtt_client
 
 async def startup_mqtt():
-    """
-    Initialize MQTT connection on application startup.
-    Call this in your FastAPI app startup event.
-    """
-    logger.info("Starting MQTT client...")
-    if not mqtt_client.connect():
-        raise Exception("Failed to initialize MQTT connection on startup")
+    connected = mqtt_client.connect()
+    if not connected:
+        raise RuntimeError("Could not connect to MQTT broker")
     
-    # Add default message handlers for device responses
-    def handle_device_response(topic: str, payload: Dict):
-        """Handle responses from Raspberry Pi devices"""
-        logger.info(f"Device response on {topic}: {payload}")
-        # You can add more sophisticated handling here
-        # e.g., update database, notify websockets, etc.
-    
-    def handle_device_status(topic: str, payload: Dict):
-        """Handle device status updates"""
-        logger.info(f"Device status update on {topic}: {payload}")
-        # Handle status updates from devices
-    
-    # Register message handlers
-    mqtt_client.add_message_handler("response/+/+", handle_device_response)
-    mqtt_client.add_message_handler("status/+", handle_device_status)
-    
-    logger.info("MQTT client started successfully")
+    # Subscribe to telemetry topic
+    subscribed = mqtt_service.subscribe_to_telemetry()
+    if not subscribed:
+        raise RuntimeError("Could not subscribe to telemetry topic")
+
+    # Register callback for incoming messages
+    mqtt_client.set_message_callback(mqtt_service.receive_results)
 
 async def shutdown_mqtt():
     """

@@ -1,5 +1,12 @@
 from fastapi import FastAPI
+from fastapi import Request
+from fastapi.responses import PlainTextResponse
+from fastapi.exception_handlers import http_exception_handler
+from fastapi import HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from routers.router import router
+from mqtt_core.mqtt_dependencies import startup_mqtt, shutdown_mqtt
+
 
 app = FastAPI(
     title="Data Transfer Rate API",
@@ -8,6 +15,19 @@ app = FastAPI(
 )
 
 app.include_router(router)
+
+
+@app.on_event("startup")
+async def startup():
+    await startup_mqtt()
+
+@app.on_event("shutdown") 
+async def shutdown():
+    await shutdown_mqtt()
+
+@app.exception_handler(Exception)
+async def all_exception_handler(request: Request, exc: Exception):
+    return PlainTextResponse(str(exc), status_code=500)
 
 if __name__ == "__main__":
     import uvicorn

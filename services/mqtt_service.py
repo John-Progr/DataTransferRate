@@ -12,7 +12,24 @@ class MQTTService:
     
     def __init__(self, mqtt_client: MQTTClient):
         self.mqtt_client = mqtt_client
+        self.latest_telemetry: Optional[Dict[str, Any]] = None  
+
+
+
+
+    
         
+    def subscribe_to_telemetry(self) -> bool:
+        """Subscribe to the 'telemetry' topic."""
+        return self.mqtt_client.subscribe_to_pi_topic("telemetry")
+
+    
+    def get_latest_telemetry(self) -> Optional[Dict[str, Any]]:
+        """Return the most recent telemetry data received."""
+        return self.latest_telemetry
+
+    
+
     def send_command(self, cmd: Union[ClientCommand, ForwarderCommand, ServerCommand]) -> Dict[str, Any]:
         """Send any type of command to a Raspberry Pi."""
         try:
@@ -66,6 +83,24 @@ class MQTTService:
                 "message": str(e)
             }
     
+
+    def receive_results(self, topic: str, payload: Dict[str, Any]):
+        """Callback for MQTT messages."""
+        logger.info(f"[MQTTService] Incoming message on topic '{topic}': {payload}")
+
+        if topic == "telemetry":
+            # Save the latest telemetry payload
+            self.latest_telemetry = payload
+            logger.info("[MQTTService] Telemetry updated")
+            return self.latest_telemetry
+
+        else:
+            logger.warning(f"[MQTTService] Unhandled topic '{topic}'")
+
+
+
+
+
     def send_network_setup(self, server_cmd: ServerCommand, 
                           forwarder_cmds: list[ForwarderCommand], 
                           client_cmd: ClientCommand) -> Dict[str, Any]:

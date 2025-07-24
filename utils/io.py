@@ -1,8 +1,7 @@
-import json
 import os
+import csv
 from datetime import datetime
-from models import DataTransferRateResponse
-
+from models.api_model import DataTransferRateResponse  # Adjust import if needed
 
 def save_data_transfer_rate_to_file(
     response: DataTransferRateResponse,
@@ -12,10 +11,13 @@ def save_data_transfer_rate_to_file(
         response.timestamp = datetime.utcnow().isoformat()
     
     record = response.dict()
-    
+
+    # ✅ Ensure directory exists
+    os.makedirs(os.path.dirname(file_path) or ".", exist_ok=True)
+
     # Check if file exists to determine if we need to write headers
     file_exists = os.path.exists(file_path)
-    
+
     # Open file in append mode
     with open(file_path, "a", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=record.keys())
