@@ -41,7 +41,7 @@ def get_data_transfer_rate_endpoint(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-         print("ERROR:", e)  # this prints to your docker logs immediately
+         print("ERROR:", e) 
          raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -79,7 +79,7 @@ def simulate_data_transfer_rate_response(request: DataTransferRateRequest):
     return DataTransferRateResponse(
         source=request.source,
         destination=request.destination,
-        path=request.path, # Ensure path is included, as it's part of the model
+        path=request.path,
         wireless_channel=request.wireless_channel,
         rate_mbps=simulated_rate_mbps,
         timestamp=int(datetime.utcnow().timestamp() * 1000) # Use Unix timestamp in ms for consistency
