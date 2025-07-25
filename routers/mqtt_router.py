@@ -3,11 +3,11 @@ from typing import Dict, Any, Union, List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-# Correct imports based on your provided files
-from mqtt_dependencies import get_mqtt_client # Provides MQTTClient instance
-from schemas import ClientCommand, ForwarderCommand, ServerCommand, CommandMessage, NetworkSetupRequest # Your schemas.py
-from mqtt_service import MQTTService, create_mqtt_service # Your mqtt_service.py
-from mqtt_core.mqtt_client import MQTTClient # For type hinting from your mqtt_client.py
+
+from mqtt_dependencies import get_mqtt_client 
+from schemas import ClientCommand, ForwarderCommand, ServerCommand, CommandMessage, NetworkSetupRequest 
+from mqtt_service import MQTTService, create_mqtt_service 
+from mqtt_core.mqtt_client import MQTTClient 
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ router = APIRouter()
 # Dependency to get an instance of MQTTService
 async def get_mqtt_service_instance(mqtt_client: MQTTClient = Depends(get_mqtt_client)) -> MQTTService:
     """Provides an MQTTService instance, ensuring the MQTT client is available."""
-    # get_mqtt_client already ensures connection or raises HTTPException
+    
     return create_mqtt_service(mqtt_client)
 
 
@@ -33,7 +33,7 @@ async def health_check():
     summary="Send a single command to a Raspberry Pi device"
 )
 async def send_single_command(
-    command: CommandMessage, # This will automatically parse based on 'role' field
+    command: CommandMessage,
     mqtt_service: MQTTService = Depends(get_mqtt_service_instance)
 ) -> Dict[str, Any]:
     """
@@ -43,7 +43,7 @@ async def send_single_command(
     - **role**: "client", "intermediate" (for forwarder), or "server"
     - Other fields depend on the role (e.g., 'ip_server' for client).
     """
-    logger.info(f"Received request to send single command: {command.model_dump()}") # Use model_dump for Pydantic V2
+    logger.info(f"Received request to send single command: {command.model_dump()}") 
     result = mqtt_service.send_command(command)
     if result.get("status") == "error":
         raise HTTPException(
