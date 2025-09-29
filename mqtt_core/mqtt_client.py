@@ -143,9 +143,13 @@ class MQTTClient:
         try:
             # Build topic based on device ID and role
             role = command_payload.get("role", "unknown")
-            topic = f"command/{device_id}/req/{role}"
+            logger.info(f"Sending to role: {role}") 
+
+            topic = f"command/{device_id}/req/start"
+            logger.info(f"Sending to topic: {topic}") 
 
             json_payload = json.dumps(command_payload)
+            logger.info(f"And json payload: {json_payload}") 
             result = self.client.publish(topic, json_payload, qos=1)
 
             if result.rc == mqtt.MQTT_ERR_SUCCESS:

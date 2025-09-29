@@ -9,6 +9,7 @@ from mqtt_core.mqtt_client import MQTTClient
 import time
 import random
 from datetime import datetime
+from utils.io import save_data_transfer_rate_to_file
 
 
 router = APIRouter(prefix="/network", tags=["network"])

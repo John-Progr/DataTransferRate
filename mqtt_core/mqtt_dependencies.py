@@ -3,11 +3,14 @@ import logging
 from typing import Dict
 from fastapi import Depends, HTTPException
 from mqtt_core.mqtt_client import MQTTClient
+from services.mqtt_service import MQTTService
 
 logger = logging.getLogger(__name__)
 
 # Global MQTT client instance
 mqtt_client = MQTTClient()
+
+mqtt_service = MQTTService(mqtt_client)
 
 def get_mqtt_client() -> MQTTClient:
     """

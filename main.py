@@ -1,12 +1,15 @@
-from fastapi import FastAPI
-from fastapi import Request
+import logging
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import PlainTextResponse
-from fastapi.exception_handlers import http_exception_handler
-from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from routers.router import router
 from mqtt_core.mqtt_dependencies import startup_mqtt, shutdown_mqtt
 
+# ✅ Configure logging once here
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+)
 
 app = FastAPI(
     title="Data Transfer Rate API",
@@ -15,7 +18,6 @@ app = FastAPI(
 )
 
 app.include_router(router)
-
 
 @app.on_event("startup")
 async def startup():

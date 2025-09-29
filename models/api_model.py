@@ -14,7 +14,7 @@ class DataTransferRateResponse(BaseModel):
     destination: str
     rate_mbps: float
     wireless_channel: int
-    timestamp: str 
+    timestamp: int
 
 
 class HealthCheckResponse(BaseModel):

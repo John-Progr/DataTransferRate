@@ -1,3 +1,5 @@
+import logging
+import time
 from datetime import datetime
 from models.api_model import DataTransferRateResponse, DataTransferRateRequest
 from typing import List, Optional 
@@ -6,77 +8,79 @@ from utils.wireless_channels import get_channel_regions, get_region
 from utils.things import get_thing_id_by_ip
 from models.mqtt_model import ClientCommand, ForwarderCommand, ServerCommand
 
+logger = logging.getLogger(__name__)
 
-def get_data_transfer_rate(source: str, destination: str, path: List[str], wireless_channel: Optional[int], mqtt_service: MQTTService) -> DataTransferRateResponse:
 
-    # we take the region for a specific wireless channel
-    regions = get_channel_regions(wireless_channel)
+def get_data_transfer_rate(
+    source: str,
+    destination: str,
+    path: List[str],
+    wireless_channel: Optional[int],
+    mqtt_service: MQTTService
+) -> DataTransferRateResponse:
+    """
+    Measure data transfer rate 10 times, sending server, forwarder, and client commands each iteration,
+    and return the average throughput.
+    """
 
-    #normally we will deal with a tuple or a single tuple object
-    region = get_region(regions)
+    repeats = 10  # fixed number of measurements
+    region = "GR"  # hardcoded region
 
-    # we send the server command first
-
+    # get IDs
+    source_id = get_thing_id_by_ip(source)
     destination_id = get_thing_id_by_ip(destination)
 
-    region = "GR"
+    rates: List[float] = []
 
-    server_cmd = ServerCommand (
-        device_id=destination_id,
-        wireless_channel=wireless_channel,
-        region=region
-    )
-    mqtt_service.send_command(server_cmd)
+    for i in range(repeats):
+        print(f"🔄 Measurement {i+1}/{repeats}")
 
-    # we send the forwarder commands
-    next_hops = list(path[1:]) + [destination]
-    for intermediate_ip, next_ip in zip(filter(None, path), next_hops):
-        intermediate_id = get_thing_id_by_ip(intermediate_ip)
-        forwarder_cmd = ForwarderCommand(
-            device_id=intermediate_id,
+        # --- Send server command ---
+        server_cmd = ServerCommand(
+            device_id=destination_id,
+            wireless_channel=wireless_channel,
+            region=region
+        )
+        mqtt_service.send_command(server_cmd)
+
+        # --- Send forwarder commands ---
+        next_hops = list(path[1:]) + [destination]
+        for intermediate_ip, next_ip in zip(filter(None, path), next_hops):
+            intermediate_id = get_thing_id_by_ip(intermediate_ip)
+            forwarder_cmd = ForwarderCommand(
+                device_id=intermediate_id,
+                wireless_channel=wireless_channel,
+                region=region,
+                ip_routing=next_ip
+            )
+            mqtt_service.send_command(forwarder_cmd)
+
+        # --- Send client command ---
+        client_cmd = ClientCommand(
+            device_id=source_id,
             wireless_channel=wireless_channel,
             region=region,
-            ip_routing=next_ip
+            ip_server=destination,
+            ip_routing=path[0] if path else None
         )
-        mqtt_service.send_command(forwarder_cmd)
 
+        time.sleep(4)  # optional delay before sending client command
+        mqtt_service.send_command(client_cmd)
 
-    #we send the client command
-    source_id = get_thing_id_by_ip(source)
-    client_cmd = ClientCommand(
-        device_id=source_id,
-        wireless_channel=wireless_channel,
-        region=region,
-        ip_server=destination,
-        ip_routing=path[0] if path else None
-    )
-    mqtt_service.send_command(client_cmd)
+        # wait for telemetry
+        message = mqtt_service.wait_for_message("telemetry", timeout=30.0)
+        rate_mbps = message["sent_rate_mbps"]
 
-    # 4. Wait for telemetry result from the source device
-    # This assumes mqtt_service has access to recent telemetry data, e.g., via an internal dictionary
-    rate_mbps = None
-    timeout = 5000  # seconds
-    polling_interval = 0.5
-    waited = 0
+        print(f"✅ Iteration {i+1}: throughput = {rate_mbps} Mbps")
+        rates.append(rate_mbps)
 
-    while waited < timeout:
-        telemetry = mqtt_service.get_telemetry(source_id)
-        if telemetry and telemetry.get("wireless_channel") == wireless_channel:
-            rate_mbps = telemetry.get("sent_rate_mbps")
-            break
-        time.sleep(polling_interval)
-        waited += polling_interval
-
-    if rate_mbps is None:
-        raise RuntimeError(f"No telemetry received from device {source_id} within {timeout} seconds.")
-
-   
-    
+    # compute average
+    avg_rate = sum(rates) / len(rates) if rates else 0.0
 
     return DataTransferRateResponse(
         source=source,
         destination=destination,
-        rate_mbps=rate_mbps,
-        wireless_channel = wireless_channel,
-        timestamp=datetime.utcnow().isoformat()
+        rate_mbps=avg_rate,
+        wireless_channel=wireless_channel,
+        timestamp=int(datetime.utcnow().timestamp() * 1000)
     )
