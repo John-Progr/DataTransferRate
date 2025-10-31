@@ -23,8 +23,8 @@ def get_data_transfer_rate(
     and return the average throughput.
     """
 
-    repeats = 10  # fixed number of measurements
-    region = "GR"  # hardcoded region
+    repeats = 1 # fixed number of measurements
+    region = get_channel_regions(wireless_channel) # hardcoded region
 
     # get IDs
     source_id = get_thing_id_by_ip(source)
@@ -43,17 +43,18 @@ def get_data_transfer_rate(
         )
         mqtt_service.send_command(server_cmd)
 
-        # --- Send forwarder commands ---
-        next_hops = list(path[1:]) + [destination]
-        for intermediate_ip, next_ip in zip(filter(None, path), next_hops):
-            intermediate_id = get_thing_id_by_ip(intermediate_ip)
-            forwarder_cmd = ForwarderCommand(
-                device_id=intermediate_id,
-                wireless_channel=wireless_channel,
-                region=region,
-                ip_routing=next_ip
-            )
-            mqtt_service.send_command(forwarder_cmd)
+        if path:
+            # --- Send forwarder commands ---
+            next_hops = list(path[1:]) + [destination]
+            for intermediate_ip, next_ip in zip(filter(None, path), next_hops):
+                intermediate_id = get_thing_id_by_ip(intermediate_ip)
+                forwarder_cmd = ForwarderCommand(
+                    device_id=intermediate_id,
+                    wireless_channel=wireless_channel,
+                    region=region,
+                    ip_routing=next_ip
+                )
+                mqtt_service.send_command(forwarder_cmd)
 
         # --- Send client command ---
         client_cmd = ClientCommand(
@@ -61,7 +62,7 @@ def get_data_transfer_rate(
             wireless_channel=wireless_channel,
             region=region,
             ip_server=destination,
-            ip_routing=path[0] if path else None
+            ip_routing=path[0] if path else destination
         )
 
         time.sleep(4)  # optional delay before sending client command
