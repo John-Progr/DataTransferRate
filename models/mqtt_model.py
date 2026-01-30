@@ -16,11 +16,16 @@ class ClientCommand(BaseCommand):
 
 class ForwarderCommand(BaseCommand):
     role: Literal["intermediate"] = "intermediate"
-    ip_routing: str
+    ip_routing_next: str
+    ip_routing_previous: str
+    ip_server: str
+    ip_client: str
 
 
 class ServerCommand(BaseCommand):
     role: Literal["server"] = "server"
+    ip_client: str
+    previous_ip: str
 
 
 # For use in request bodies where the type could be any one of the three
