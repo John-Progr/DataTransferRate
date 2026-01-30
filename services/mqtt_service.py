@@ -60,7 +60,10 @@ class MQTTService:
                         "role": "forwarder",
                         "wireless_channel": cmd.wireless_channel,
                         "region": cmd.region,
-                        "ip_routing": cmd.ip_routing,
+                        "ip_routing_next": cmd.ip_routing_next ,
+                        "ip_routing_previous": cmd.ip_routing_previous,
+                        "ip_server": cmd.ip_server,
+                        "ip_client": cmd.ip_client,
                     }
                 }
             elif isinstance(cmd, ServerCommand):
@@ -69,8 +72,10 @@ class MQTTService:
                         "role": "server",
                         "wireless_channel": cmd.wireless_channel,
                         "region": cmd.region,
-                        "ip_routing": None,
+                        "ip_client": cmd.ip_client,
+                        "previous_ip": cmd.previous_ip,
                     }
+
                 }
             else:
                 return {"status": "error", "message": "Unknown command type"}
